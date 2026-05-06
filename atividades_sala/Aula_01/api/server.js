@@ -6,40 +6,43 @@ const api = express()
 api.use(express.json())
 api.use(cors())
 
-const dados = []
-let id = 0;
+const dadosUsuarios = []
+const dadosDispositivos = []
+
+let idUsuarios = 0;
+let idDispositivos = 0;
 
 //Rotas
 api.get('/usuarios', (req, res)=>{
-    let users = dados;
+    let users = dadosUsuarios;
 
     res.status(200).send(users)
 })
 
 
 api.post('/novoUsuario',(req, res)=>{
-    if(dados.length <= 0){
-        id = 0;
+    if(dadosUsuarios.length <= 0){
+        idUsuarios = 0;
     }
-    id = id + 1; //incremento
+    idUsuarios = idUsuarios + 1; //incremento
     
     let user = {
-        id: id,
+        id: idUsuarios,
         nome_completo: req.body.nome_completo,
         email: req.body.email,
         senha: req.body.senha
     }
-    dados.push(user)
+    dadosUsuarios.push(user)
     res.status(201).send({
         code: 201,
         msg: "Usuário Criado com sucesso!"})
 })
 api.delete('/usuarios/:id', (req, res)=>{
     let id = req.params.id
-    let index = dados.findIndex(p => p.id === parseInt(id))
+    let index = dadosUsuarios.findIndex(p => p.id === parseInt(id))
 
     if(index !== -1){
-        dados.splice(index, 1);
+        dadosUsuarios.splice(index, 1);
         
         return res.status(200).send({
             code: 200,
@@ -57,10 +60,10 @@ api.delete('/usuarios/:id', (req, res)=>{
 api.put('/usuarios/:id', (req, res)=>{
     let id = req.params.id
     let newBody = req.body
-    let index = dados.findIndex(p => p.id === parseInt(id))
+    let index = dadosUsuarios.findIndex(p => p.id === parseInt(id))
 
     if(index !== -1){
-        dados[index] = {id: parseInt(id), ...newBody}
+        dadosUsuarios[index] = {id: parseInt(id), ...newBody}
         return res.status(200).send({
             code: 200,
             msg: "Usuário editado com sucesso!"
@@ -77,65 +80,67 @@ api.put('/usuarios/:id', (req, res)=>{
 
 //Rotas dispositivo
 api.get('/dispositivo', (req, res)=>{
-    let users = dados;
+    let users = dadosDispositivos;
 
     res.status(200).send(users)
 })
 
 
-api.post('/novoUsuario',(req, res)=>{
-    if(dados.length <= 0){
-        id = 0;
+api.post('/novoDispositivo',(req, res)=>{
+    if(dadosDispositivos.length <= 0){
+        idDispositivos = 0;
     }
-    id = id + 1; //incremento
+    idDispositivos = idDispositivos + 1; //incremento
     
     let user = {
-        id: id,
+        id: idDispositivos,
         nome_completo: req.body.nome_completo,
         email: req.body.email,
         senha: req.body.senha
     }
-    dados.push(user)
+    dadosDispositivos.push(user)
     res.status(201).send({
         code: 201,
-        msg: "Usuário Criado com sucesso!"})
+        msg: "Dispositivo Criado com sucesso!"})
 })
-api.delete('/usuarios/:id', (req, res)=>{
+
+api.delete('/dispositivos/:id', (req, res)=>{
     let id = req.params.id
-    let index = dados.findIndex(p => p.id === parseInt(id))
+    let index = dadosDispositivos.findIndex(p => p.id === parseInt(id))
 
     if(index !== -1){
-        dados.splice(index, 1);
+        dadosDispositivos.splice(index, 1);
         
         return res.status(200).send({
             code: 200,
-            msg: "Usuário deletado com sucesso!"
+            msg: "Dispositivo deletado com sucesso!"
         })
     }
     else{
         return res.status(404).send({
             code: 404,
-            msg: "Usuário não encontrado"
+            msg: "Dispositivo não encontrado"
         })
     }
 
 })
-api.put('/usuarios/:id', (req, res)=>{
+
+api.put('/dispositivos/:id', (req, res)=>{
     let id = req.params.id
     let newBody = req.body
-    let index = dados.findIndex(p => p.id === parseInt(id))
+    let index = dadosDispositivos.findIndex(p => p.id === parseInt(id))
 
     if(index !== -1){
-        dados[index] = {id: parseInt(id), ...newBody}
+        dadosDispositivos[index] = {id: parseInt(id), ...newBody}
         return res.status(200).send({
             code: 200,
-            msg: "Usuário editado com sucesso!"
+            msg: "Dispositivo editado com sucesso!"
         })
     }
     else{
         return res.status(404).send({
             code: 404,
-            msg: "Usuário não encontrado"
+            msg: "Dispositivo não encontrado"
         })
     }
 })

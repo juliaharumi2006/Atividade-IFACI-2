@@ -34,7 +34,7 @@ export default function CriarUsuario(){
 
     const criarUsuario = async ()=>{
         //Promise -> Promessa
-        const url = 'http://localhost:8080/novoUsuarios'
+        const url = 'http://localhost:8080/novoUsuario'
         try{
             const resposta = await fetch(url, {
                 method: "POST",

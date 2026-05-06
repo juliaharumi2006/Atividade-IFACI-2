@@ -1,172 +1,139 @@
+// 
 "use client"
-import { METHODS } from "http"
-import {useState, useEffect, useRef, ChangeEvent} from "react"
+import { useState, useEffect, useRef, ChangeEvent } from "react"
 
+type Dispositivo = {
+    id_dispositivo: number
+    nome_dispositivo: string
+}
 
-export default function ListarDispositivo(){ 
-    //Criar a lógica aqui.
-    const [dispositivos, setDispositivos] = useState([{
-        nome_dispositivo: "",
-        id_dispositivo: 0,
-    }])
-    const [novoDispositivo, setNovoDispositivo] = useState({
+export default function ListarDispositivo() { 
+
+    const [dispositivos, setDispositivos] = useState<Dispositivo[]>([])
+    const [novoDispositivo, setNovoDispositivo] = useState<Dispositivo>({
         nome_dispositivo: "",
         id_dispositivo: 0,
     })
 
-    const userId = useRef(0) //Variável Global
-
-    const pegaInfoBackend = async () =>{
-        //Responsável por fazer um GET no usuários backend.
-        const url = "http://localhost:8080/dispositivos"
-        try{
-            //tentando até ter sucesso
-            const resposta = await fetch(url)
-            const resposta_json = await resposta.json()
-            setDispositivos(resposta_json)
-        }
-        catch(erro){
-            //pegar o erro (caso exista)
-            console.log(erro)
-        }
-    }
-    
-    const deletaDispositivo = async (id:number)=>{
-        const url = `http://localhost:8080/dispositivos/${id}`
-        const config_request = {
-            method: "DELETE"
-        }
-        try{
-            const resposta = await fetch(url,config_request)
-            const resposta_json = await resposta.json()
-            
-            alert(resposta_json.msg)
-        }
-        catch(erro){
-            console.log(erro)
-        }
-    }
-
+    const userId = useRef<number>(0)
     const [modalAberto, setModalAberto] = useState(false)
 
-    const pegaInfo = (e: ChangeEvent<HTMLInputElement>, where: string)=>{
-         const value = e.target.value
-
-        if (where === "nome") {
-            setNovoDispositivo({
-                ...novoDispositivo,
-                nome_dispositivo: value
-            })
+    const pegaInfoBackend = async () =>{
+        try{
+            const resposta = await fetch("http://localhost:8080/dispositivo")
+            const data = await resposta.json()
+            setDispositivos(data)
         }
-        else {
-            setNovoDispositivo({
-                ...novoDispositivo,
-                id_dispositivo: value
-            })
+        catch(erro){
+            console.log(erro)
         }
     }
 
-    const editarDispositivo = async (id:number)=>{
-        const url = `http://localhost:8080/dispositivos/${id}`
-        const config_request = {
-            method: "PUT",
-            headers: {"Content-Type": "application/json"},
-            body: JSON.stringify(novoDispositivo)
-        }
+    const deletaDispositivo = async (id:number)=>{
         try{
-            const resposta = await fetch(url, config_request)
-            const resposta_json = await resposta.json()
-            alert(resposta_json.msg)
-            setNovoDispositivo({
-                nome_dispositivo: "",
-                id_dispositivo: "",
+            await fetch(`http://localhost:8080/dispositivo/${id}`, {
+                method: "DELETE"
             })
+            pegaInfoBackend() // 🔥 atualiza lista
         }
         catch(erro){
-            alert("Erro ao editar o dispositivo")
+            console.log(erro)
         }
+    }
+
+    const pegaInfo = (e: ChangeEvent<HTMLInputElement>)=>{
+        setNovoDispositivo({
+            ...novoDispositivo,
+            nome_dispositivo: e.target.value
+        })
+    }
+
+    const editarDispositivo = async ()=>{
+        try{
+            await fetch(`http://localhost:8080/dispositivo/${userId.current}`, {
+                method: "PUT",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify(novoDispositivo)
+            })
+
+            setModalAberto(false)
+            pegaInfoBackend() // 🔥 atualiza lista
+
+        } catch {
+            alert("Erro ao editar")
+        }
+    }
+
+    const abrirModal = (dispositivo: Dispositivo) => {
+        userId.current = dispositivo.id_dispositivo
+        setNovoDispositivo(dispositivo)
+        setModalAberto(true)
     }
 
     useEffect(()=>{
         pegaInfoBackend()
     }, [])
-    
-    return(
-        <div className="w-[40vw] max-h-[88vh] overflow-y-auto bg-white text-black rounded-xl flex flex-col gap-4 p-4">
-            <h2 className="text-xl font-semibold">Lista de Dispositivos</h2>
-                {dispositivos.map((indice, id)=>{
-                    return(
-                        <div key={id} className="bg-gray-200 border-2 border-black rounded-lg p-4 ">
-                            <h2 className="text-lg font-semibold">Dispositivo {indice.id} </h2>
-                            <div>
-                                <p>{indice.nome_dispositivo}</p>
-                            </div>
-                            <div className="flex gap-4">
-                                <p>Senha: {indice.id_dispositivo}</p>
-                                <p className="font-black"></p>
-                            </div>
-                            <div className="flex w-full justify-end gap-4">
-                                <input
-                                type="button"
-                                value="Editar"
-                                onClick={()=>{setModalAberto(true); userId.current = indice.id}}
-                                className="rounded-lg px-4 py-2 bg-blue-400 hover:bg-blue-500 text-white cursor-pointer"
-                                />
-                                <input
-                                type="button"
-                                value="Deletar"
-                                onClick={()=>{deletaDispositivo(indice.id)}}
-                                className="rounded-lg px-4 py-2 bg-red-400 hover:bg-red-500 text-white cursor-pointer"
-                                />
-                            </div>
-                        </div>
-                    )
-                })}
-                {modalAberto && 
-                    <div className="w-screen h-screen inset-0 absolute bg-gray-700/50 flex justify-center items-center">
-                        <div className="w-[50vw] h-fit rounded-2xl shadow-lg bg-white flex flex-col px-6 py-4 gap-8">
-                            <h2 className="text-xl font-semibold">Editar Dispositivo {userId.current}</h2>
-                            <div className="flex flex-col gap-4">
-                                <input
-                                type="text"
-                                placeholder="Novo Nome"
-                                value = {novoDispositivo.nome}
-                                onChange={(e)=>{pegaInfo(e, "nome")}}
-                                className="p-4 rounded-lg outline-2 outline-red-500 "
-                                />
-                                <input
-                                type="email"
-                                placeholder="Novo email"
-                                value = {novoDispositivo.email}
-                                onChange={(e)=>{pegaInfo(e, "email")}}
-                                className="p-4 rounded-lg outline-2 outline-red-500 "
-                                />
-                                <input
-                                type="password"
-                                placeholder="Nova Senha"
-                                value = {novoDispositivo.senha}
-                                onChange={(e)=>{pegaInfo(e, "senha")}}
-                                className="p-4 rounded-lg outline-2 outline-red-500 "
-                                />
 
-                                <div className="flex gap-8 justify-end w-full">
-                                    <input
-                                    type="button"
-                                    value="Confirmar"
-                                    onClick={()=>{editarDispositivo(userId.current);setModalAberto(false)}}
-                                    className="rounded-lg px-4 py-2 bg-blue-400 hover:bg-blue-500 text-white cursor-pointer"
-                                    />
-                                    <input
-                                    type="button"
-                                    value="Cancelar"
-                                    onClick={()=>{setModalAberto(false)}}
-                                    className="rounded-lg px-4 py-2 bg-red-400 hover:bg-red-500 text-white cursor-pointer"
-                                    />
-                                </div>
-                            </div>
+    return(
+        <div className="w-[40vw] bg-white text-black rounded-xl flex flex-col gap-4 p-4">
+            <h2 className="text-xl font-semibold">Lista de Dispositivos</h2>
+
+            {dispositivos.map((d)=>(
+                <div key={d.id_dispositivo} className="bg-gray-200 rounded-lg p-4">
+                    <h2 className="font-semibold">ID: {d.id_dispositivo}</h2>
+                    <p>{d.nome_dispositivo}</p>
+
+                    <div className="flex justify-end gap-4 mt-2">
+                        <button
+                            onClick={()=>abrirModal(d)}
+                            className="bg-blue-500 text-white px-3 py-1 rounded"
+                        >
+                            Editar
+                        </button>
+
+                        <button
+                            onClick={()=>deletaDispositivo(d.id_dispositivo)}
+                            className="bg-red-500 text-white px-3 py-1 rounded"
+                        >
+                            Deletar
+                        </button>
+                    </div>
+                </div>
+            ))}
+
+            {modalAberto && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center">
+                    <div className="bg-white p-6 rounded-xl w-[400px] flex flex-col gap-4">
+                        <h2 className="text-lg font-semibold">
+                            Editar Dispositivo {userId.current}
+                        </h2>
+
+                        <input
+                            type="text"
+                            value={novoDispositivo.nome_dispositivo}
+                            onChange={pegaInfo}
+                            placeholder="Nome do dispositivo"
+                            className="border p-2 rounded"
+                        />
+
+                        <div className="flex justify-end gap-4">
+                            <button
+                                onClick={editarDispositivo}
+                                className="bg-blue-500 text-white px-4 py-2 rounded"
+                            >
+                                Salvar
+                            </button>
+
+                            <button
+                                onClick={()=>setModalAberto(false)}
+                                className="bg-gray-400 px-4 py-2 rounded"
+                            >
+                                Cancelar
+                            </button>
                         </div>
                     </div>
-                }
+                </div>
+            )}
         </div>
     )
 }
