@@ -4,9 +4,9 @@ import SideBar from "./SideBar"
 
 export default function CriarDispositivo(){
     const [novoDispositivo, setNovoDispositivo] = useState({
-        nome_completo: "",
-        email: "",
-        senha: ""
+        nome_sensor: "",
+        id_sensor: "",
+        status_sensor: ""
     })
 
     const pegaInfo = (e: ChangeEvent<HTMLInputElement>, where: string)=>{
@@ -15,26 +15,26 @@ export default function CriarDispositivo(){
         if (where === "nome") {
             setNovoDispositivo({
                 ...novoDispositivo,
-                nome_completo: value
+                nome_sensor: value
             })
         }
-        else if (where === "email") {
+        else if (where === "id") {
             setNovoDispositivo({
                 ...novoDispositivo,
-                email: value
+                id_sensor: value
             })
         }
         else {
             setNovoDispositivo({
                 ...novoDispositivo,
-                senha: value
+                status_sensor: value
             })
         }
     }
 
     const criarDispositivo = async ()=>{
         //Promise -> Promessa
-        const url = 'http://localhost:8080/novoDispositivo'
+        const url = 'http://localhost:8080/novoSensor'
         try{
             const resposta = await fetch(url, {
                 method: "POST",
@@ -56,29 +56,29 @@ export default function CriarDispositivo(){
         
         <div>
             <SideBar/>
-            <div className="w-[40vw] ml-[15vw] flex flex-col gap-4 rounded-xl max-h-fit bg-white text-black p-4">
+            <div className="w-[40vw] flex flex-col gap-4 rounded-xl max-h-fit bg-white text-black p-4">
             
                 <h2 className="text-lg font-semibold">Criar Novo Dispositivo</h2>
 
                 <input
                 type="text"
-                placeholder="Nome Completo"
-                value = {novoDispositivo.nome_completo}
+                placeholder="Nome do Dispositivo"
+                value = {novoDispositivo.nome_sensor}
                 onChange={(e)=>{pegaInfo(e, "nome")}}
                 className="p-4 rounded-lg outline-2 outline-red-500 "
                 />
                 <input
-                type="email"
-                placeholder="email@email.com"
-                value = {novoDispositivo.email}
-                onChange={(e)=>{pegaInfo(e, "email")}}
+                type="text"
+                placeholder="ID do Dispositivo"
+                value = {novoDispositivo.id_sensor}
+                onChange={(e)=>{pegaInfo(e, "id")}}
                 className="p-4 rounded-lg outline-2 outline-red-500 "
                 />
                 <input
-                type="password"
-                placeholder="Crie uma senha"
-                value = {novoDispositivo.senha}
-                onChange={(e)=>{pegaInfo(e, "senha")}}
+                type="text"
+                placeholder="Status do Dispositivo"
+                value = {novoDispositivo.status_sensor}
+                onChange={(e)=>{pegaInfo(e, "status")}}
                 className="p-4 rounded-lg outline-2 outline-red-500 "
                 />
 

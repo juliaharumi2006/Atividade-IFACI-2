@@ -3,16 +3,18 @@
 import { useState, useEffect, useRef, ChangeEvent } from "react"
 
 type Dispositivo = {
-    id_dispositivo: number
-    nome_dispositivo: string
+    nome_sensor: string
+    id_sensor: number
+    status_sensor?: string
 }
 
 export default function ListarDispositivo() { 
 
     const [dispositivos, setDispositivos] = useState<Dispositivo[]>([])
     const [novoDispositivo, setNovoDispositivo] = useState<Dispositivo>({
-        nome_dispositivo: "",
-        id_dispositivo: 0,
+        nome_sensor: "",
+        id_sensor: 0,
+        status_sensor: ""
     })
 
     const userId = useRef<number>(0)
@@ -20,7 +22,7 @@ export default function ListarDispositivo() {
 
     const pegaInfoBackend = async () =>{
         try{
-            const resposta = await fetch("http://localhost:8080/dispositivo")
+            const resposta = await fetch("http://localhost:8080/novoSensor")
             const data = await resposta.json()
             setDispositivos(data)
         }
@@ -44,7 +46,7 @@ export default function ListarDispositivo() {
     const pegaInfo = (e: ChangeEvent<HTMLInputElement>)=>{
         setNovoDispositivo({
             ...novoDispositivo,
-            nome_dispositivo: e.target.value
+            nome_sensor: e.target.value
         })
     }
 
@@ -65,7 +67,7 @@ export default function ListarDispositivo() {
     }
 
     const abrirModal = (dispositivo: Dispositivo) => {
-        userId.current = dispositivo.id_dispositivo
+        userId.current = dispositivo.id_sensor
         setNovoDispositivo(dispositivo)
         setModalAberto(true)
     }
@@ -79,9 +81,10 @@ export default function ListarDispositivo() {
             <h2 className="text-xl font-semibold">Lista de Dispositivos</h2>
 
             {dispositivos.map((d)=>(
-                <div key={d.id_dispositivo} className="bg-gray-200 rounded-lg p-4">
-                    <h2 className="font-semibold">ID: {d.id_dispositivo}</h2>
-                    <p>{d.nome_dispositivo}</p>
+                <div key={d.id_sensor} className="bg-gray-200 rounded-lg p-4">
+                    <h2 className="font-semibold">ID: {d.id_sensor}</h2>
+                    <p>{d.nome_sensor}</p>
+                    {d.status_sensor && <p>Status: {d.status_sensor}</p>}   
 
                     <div className="flex justify-end gap-4 mt-2">
                         <button
@@ -92,7 +95,7 @@ export default function ListarDispositivo() {
                         </button>
 
                         <button
-                            onClick={()=>deletaDispositivo(d.id_dispositivo)}
+                            onClick={()=>deletaDispositivo(d.id_sensor)}
                             className="bg-red-500 text-white px-3 py-1 rounded"
                         >
                             Deletar
@@ -110,7 +113,7 @@ export default function ListarDispositivo() {
 
                         <input
                             type="text"
-                            value={novoDispositivo.nome_dispositivo}
+                            value={novoDispositivo.nome_sensor}
                             onChange={pegaInfo}
                             placeholder="Nome do dispositivo"
                             className="border p-2 rounded"
